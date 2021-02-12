@@ -2,7 +2,6 @@ import pytest
 
 from ee.models import EnvironmentDefinition
 
-
 TEST_INPUT = """\
 {
     "packages": {
