@@ -2,6 +2,7 @@ import pytest
 
 from ee.models import EnvironmentDefinition
 
+
 TEST_INPUT = """\
 {
     "packages": {
@@ -9,6 +10,8 @@ TEST_INPUT = """\
     }
 }
 """
+
+
 def test_create_simple_environment_definition():
     env_def = EnvironmentDefinition(TEST_INPUT)
     assert env_def.id == "92f9752"
@@ -28,6 +31,8 @@ INPUT_WITH_CHANNELS = """\
     ]
 }
 """
+
+
 def test_create_environment_with_channels_specified():
     env_def = EnvironmentDefinition(INPUT_WITH_CHANNELS)
     assert env_def.channels == ["chan1", "chan2"]
@@ -44,3 +49,13 @@ def test_create_invalid_environment_definition_blank_packages():
     with pytest.raises(ValueError, match="Your packages cannot be blank/empty in your "
                                          "environment definition."):
         EnvironmentDefinition('{"packages": {}}')
+
+
+def test_environment_definition_equality():
+    env_def_1 = EnvironmentDefinition('{"packages": {"foo": "1.2.3"}}')
+    env_def_2 = EnvironmentDefinition('{"packages": {"foo": "1.2.4"}}')
+    env_def_3 = EnvironmentDefinition('{"packages": {"foo": "1.2.3"}}')
+
+    assert env_def_1 == env_def_3
+    assert env_def_2 != env_def_3
+    assert env_def_2 == env_def_2

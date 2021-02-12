@@ -4,6 +4,8 @@ from typing import Dict, List
 
 
 # TODO: should we use Pydantic?
+from dataclasses import dataclass
+
 
 class EnvironmentDefinition:
     def __init__(self, raw_def: str):
@@ -11,6 +13,9 @@ class EnvironmentDefinition:
         self.raw_def = raw_def
         self.env_def = env_def
         self._long_id = None
+
+    def __eq__(self, other):
+        return type(self) is type(other) and other.raw_def == self.raw_def
 
     def parse_env_def(self, raw_def: str) -> Dict:
         env_def = json.loads(raw_def)
@@ -61,3 +66,15 @@ class EnvironmentDefinition:
             then it will return an empty list.
         """
         return self.env_def.get("channels", [])
+
+
+@dataclass
+class Application:
+    name: str
+
+
+@dataclass
+class ApplicationEnvironment:
+    app: Application
+    env: str
+    env_def: EnvironmentDefinition
