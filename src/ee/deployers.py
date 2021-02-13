@@ -1,41 +1,68 @@
 import abc
+from typing import List
 
 from ee.models import EnvironmentDefinition
 
 
-class DeployerBackendBase(abc.ABC):
+class DeploymentBackend(abc.ABC):
 
-    def __init__(self, use_long_id: bool = True):
-        self.use_long_id = use_long_id
+    def run(self, env_def: EnvironmentDefinition, command: List[str]):
+        """
+        This is the main public method.
 
-    def deploy(self, env_def: EnvironmentDefinition, command=None):
-        env_id = env_def.long_id if self.use_long_id else env_def.id
-        if not self.env_exists(env_id):
+        This is a template method which relies on the DeploymentBackend
+        subclasses to provide the methods:
+            .env_exists(env_id)
+            .create_env(env_def)
+            .execute(env_id, command_args)
+
+        Args:
+            env_def: the full EnvironmentDefinition object
+            command: the list of command line arguments to be executed
+                inside the environment
+        """
+        if not self.env_exists(env_def.id):
             self.create_env(env_def)
         if command:
-            self.execute(env_id, command)
+            self.execute(env_def.id, command)
 
     @abc.abstractmethod
     def env_exists(self, env_id: str) -> bool:
-        '''
-        Check if environment with env_id already exists
-        :param env_id:
-        :return: True if environment exists, False otherwise
-        '''
+        """
+        Checks whether an environment already exists or not, given
+        its environment id.
+
+        Args:
+            env_id: hash/identifier for the environment
+
+        Returns:
+            True if the environment exists, False otherwise
+
+        """
 
     @abc.abstractmethod
     def create_env(self, env_def: EnvironmentDefinition):
-        '''
+        """
         Create an environment using the environment def
-        :param env_def: Full environment definition
-        :return:
-        '''
 
-    def execute(self, env_id: str, command: str):
-        '''
-        Given and environment id and command.
-        Execute the command in the context of the environment
-        :param env_id: Id of context environment
-        :param command: Command to be executed under context environment
-        :return:
-        '''
+        Args:
+            env_def: Full environment definition
+
+        Returns:
+            None
+
+        """
+
+    @abc.abstractmethod
+    def execute(self, env_id: str, command: List[str]):
+        """
+        Executes the given command inside the given environment.
+
+        Args:
+            env_id: hash/identifier for the environment
+            command: list of command line arguments (including the main command)
+
+        Returns:
+            None
+
+        """
