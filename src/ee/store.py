@@ -1,10 +1,28 @@
+from typing import List
+
+from ee.deployers import DeploymentBackend
 from ee.models import EnvironmentDefinition, ApplicationEnvironment
 
 
 class EnvironmentStore:
+    """this is the service
 
-    def __init__(self, dao):
+    The service knows about a DAO/Store and it also knows about
+    a DeploymentBackend.
+
+    The service could be split in two parts: one that serves
+    the purpose to fulfill the admin use cases:
+        - create a new environment definition
+        - associate an environment definition to an
+            (application, environment)
+    and the other that serves the purpose to fulfill
+    the normal user use case:
+        - run something in the context of (application, environment)
+    """
+
+    def __init__(self, *, dao, deployment_backend: DeploymentBackend):
         self.dao = dao
+        self.deployment_backend = deployment_backend
 
     def save_env_def(self, env_def: EnvironmentDefinition):
         self.dao.save_env_def(env_def)
@@ -17,3 +35,7 @@ class EnvironmentStore:
 
     def get_app_env(self, app_name: str, env_name: str) -> ApplicationEnvironment:
         return self.dao.get_app_env(app_name, env_name)
+
+    def run(self, app_name: str, env_name: str, command: List[str]):
+        app_env = self.get_app_env(app_name, env_name)
+        self.deployment_backend.run(app_env.env_def, command)

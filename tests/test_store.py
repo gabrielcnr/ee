@@ -2,6 +2,7 @@ import pytest
 
 from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
 from ee.store import EnvironmentStore
+from test_deployers import InMemoryDeploymentBackend
 
 
 class InMemoryEnvironmentDAO:
@@ -34,7 +35,8 @@ class InMemoryEnvironmentDAO:
 @pytest.fixture
 def env_store():
     dao = InMemoryEnvironmentDAO()
-    env_store = EnvironmentStore(dao)
+    deployment_backend = InMemoryDeploymentBackend()
+    env_store = EnvironmentStore(dao=dao, deployment_backend=deployment_backend)
     return env_store
 
 
@@ -85,3 +87,21 @@ def test_application_environment_roundtrip(env_store: EnvironmentStore):
     app_env_returned = env_store.get_app_env("my-app", "prod")
 
     assert app_env_returned.env_def.packages == {"foo": "9.8.7"}
+
+
+def test_run(env_store: EnvironmentStore):
+    # First we create an environment definition
+    env_def = EnvironmentDefinition('{"packages": {"foo": "9.8.7"}}')
+    env_store.save_env_def(env_def)
+
+    # Then we associate it to an (application, environment)
+    app = Application(name="some_app")
+    app_env = ApplicationEnvironment(app=app, env="uat", env_def=env_def)
+    env_store.save_app_env(app_env)
+
+    # Finally we ask the service to run something on that (app, env)
+    env_store.run("some_app", "uat", ["hello", "world"])
+
+    # We can then run the asserts against the deployment backend inside our service
+    assert [("b262deb", env_def)] == env_store.deployment_backend.envs
+    assert [("b262deb", ["hello", "world"])] == env_store.deployment_backend.executed_commands
