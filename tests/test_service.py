@@ -2,10 +2,11 @@ import pytest
 
 from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
 from ee.service import EnvironmentService
+from ee.store import EnvironmentStore
 from test_deployers import InMemoryDeploymentBackend
 
 
-class InMemoryEnvironmentDAO:
+class InMemoryEnvironmentStore(EnvironmentStore):
     def __init__(self):
         self.d = {
             "env_defs": {},
@@ -34,9 +35,9 @@ class InMemoryEnvironmentDAO:
 
 @pytest.fixture
 def env_service():
-    dao = InMemoryEnvironmentDAO()
+    store = InMemoryEnvironmentStore()
     deployment_backend = InMemoryDeploymentBackend()
-    env_service = EnvironmentService(dao=dao, deployment_backend=deployment_backend)
+    env_service = EnvironmentService(store=store, deployment_backend=deployment_backend)
     return env_service
 
 

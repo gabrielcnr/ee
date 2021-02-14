@@ -2,6 +2,7 @@ from typing import List
 
 from ee.deployers import DeploymentBackend
 from ee.models import EnvironmentDefinition, ApplicationEnvironment
+from ee.store import EnvironmentStore
 
 
 class EnvironmentService:
@@ -19,21 +20,21 @@ class EnvironmentService:
         - run something in the context of (application, environment)
     """
 
-    def __init__(self, *, dao, deployment_backend: DeploymentBackend):
-        self.dao = dao
+    def __init__(self, *, store: EnvironmentStore, deployment_backend: DeploymentBackend):
+        self.store = store
         self.deployment_backend = deployment_backend
 
     def save_env_def(self, env_def: EnvironmentDefinition):
-        self.dao.save_env_def(env_def)
+        self.store.save_env_def(env_def)
 
     def get_env_def(self, env_id: str) -> EnvironmentDefinition:
-        return self.dao.get_env_def(env_id)
+        return self.store.get_env_def(env_id)
 
     def save_app_env(self, app_env: ApplicationEnvironment):
-        self.dao.save_app_env(app_env)
+        self.store.save_app_env(app_env)
 
     def get_app_env(self, app_name: str, env_name: str) -> ApplicationEnvironment:
-        return self.dao.get_app_env(app_name, env_name)
+        return self.store.get_app_env(app_name, env_name)
 
     def run(self, app_name: str, env_name: str, command: List[str]):
         app_env = self.get_app_env(app_name, env_name)
