@@ -4,9 +4,8 @@ from ee.deployers import DeploymentBackend
 from ee.models import EnvironmentDefinition, ApplicationEnvironment
 
 
-class EnvironmentStore:
-    """this is the service
-
+class EnvironmentService:
+    """
     The service knows about a DAO/Store and it also knows about
     a DeploymentBackend.
 
