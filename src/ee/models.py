@@ -70,11 +70,15 @@ class EnvironmentDefinition:
 
 @dataclass
 class Application:
+    #: The name of the Application
     name: str
 
 
 @dataclass
 class ApplicationEnvironment:
     app: Application
+
+    #: The name of the environment (e.g.: prod, staging, dev1, dev2, ...)
     env: str
+
     env_def: EnvironmentDefinition
