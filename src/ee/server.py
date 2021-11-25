@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Optional, Dict, List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ee.models import EnvironmentDefinition
+from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
 from ee.store import EnvSqliteGateway
 
 
@@ -12,6 +12,18 @@ class EnvDef(BaseModel):
     packages: Dict
     channels: Optional[List[str]] = Field(default_factory=list)
     env_id: Optional[str] = None
+
+
+class AppEnvRequest(BaseModel):
+    app: str
+    env: str  # env name
+    env_id: str  # hash
+
+
+class AppEnvResponse(BaseModel):
+    app: str
+    env: str
+    env_id: str
 
 
 app = FastAPI()
@@ -40,5 +52,24 @@ async def get_env_def(env_id: str):
 
 
 @app.post("/appenvs/")
-async def configure_app_env():
-    ...
+async def configure_app_env(app_env_request: AppEnvRequest):
+    """
+    gotta send
+        app name
+        env name
+        env id
+    """
+    # first we need to check if the given env_id is valid?
+    env_def = store.get_env_def(app_env_request.env_id)
+    if env_def is None:
+        raise HTTPException(status_code=404, detail="env_id not found")
+
+    app_env = ApplicationEnvironment(app=Application(name=app_env_request.app),
+                                     env=app_env_request.env,
+                                     env_def=env_def)
+
+    store.save_app_env(app_env)
+    return AppEnvResponse(app=app_env.app.name,
+                          env=app_env.env,
+                          env_id=app_env.env_def.id)
+
