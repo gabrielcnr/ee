@@ -37,3 +37,8 @@ async def get_env_def(env_id: str):
     env_def = store.get_env_def(env_id)
     env_def_api_model = EnvDef(packages=env_def.packages, channels=env_def.channels, env_id=env_def.id)
     return env_def_api_model.dict()
+
+
+@app.post("/appenvs/")
+async def configure_app_env():
+    ...
