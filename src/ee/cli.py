@@ -18,7 +18,7 @@ from ee.server import EnvDef
 
 app = typer.Typer()
 
-client = EEClient("https://localhost:8000")
+client = EEClient("http://localhost:8000")
 
 @app.command()
 def new(filename: Path):

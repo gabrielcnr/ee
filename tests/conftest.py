@@ -1,10 +1,10 @@
 import pytest
 
 from ee.models import EnvironmentDefinition, ApplicationEnvironment
-from ee.store import EnvironmentStore
+from ee.store import EnvGateway
 
 
-class InMemoryEnvironmentStore(EnvironmentStore):
+class InMemoryEnvironmentStore(EnvGateway):
     def __init__(self):
         self.d = {
             "env_defs": {},

@@ -11,6 +11,8 @@ class EnvDef(BaseModel):
 
 app = FastAPI()
 
+store = EEStore()
+
 
 @app.post("/envdefs/")
 async def create_env_def(env_def: EnvDef):

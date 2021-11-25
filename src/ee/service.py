@@ -2,7 +2,7 @@ from typing import List
 
 from ee.deployers import DeploymentBackend
 from ee.models import EnvironmentDefinition, ApplicationEnvironment
-from ee.store import EnvironmentStore
+from ee.store import EnvGateway
 
 
 class EnvironmentService:
@@ -20,7 +20,7 @@ class EnvironmentService:
         - run something in the context of (application, environment)
     """
 
-    def __init__(self, *, store: EnvironmentStore, deployment_backend: DeploymentBackend):
+    def __init__(self, *, store: EnvGateway, deployment_backend: DeploymentBackend):
         self.store = store
         self.deployment_backend = deployment_backend
 

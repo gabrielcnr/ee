@@ -10,6 +10,8 @@ class EEClient:
         self.base_url = base_url
 
     def new(self, env_def: EnvDef) -> str:
+        """ Send a request to create a new env def.
+        """
         url = f"{self.base_url}/envdefs"
         resp = requests.post(url, json=env_def.dict())
         resp.raise_for_status()

@@ -8,6 +8,8 @@ from dataclasses import dataclass
 
 
 class EnvironmentDefinition:
+    """ This is the business object.
+    """
     def __init__(self, raw_def: str):
         env_def = self.parse_env_def(raw_def)
         self.raw_def = raw_def
@@ -16,6 +18,11 @@ class EnvironmentDefinition:
 
     def __eq__(self, other):
         return type(self) is type(other) and other.raw_def == self.raw_def
+
+    @classmethod
+    def from_dict(cls, env_def_dict: Dict) -> "EnvironmentDefinition":
+        raw = json.dumps(env_def_dict, sort_keys=True)
+        return cls(raw)
 
     def parse_env_def(self, raw_def: str) -> Dict:
         env_def = json.loads(raw_def)

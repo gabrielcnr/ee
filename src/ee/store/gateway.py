@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from ee.models import EnvironmentDefinition, ApplicationEnvironment
 
 
-class EnvironmentStore(ABC):
+class EnvGateway(ABC):
     """
     Base / abstract class that provides the interface
     for the persistence / "database" layer for the
