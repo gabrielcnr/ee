@@ -42,10 +42,18 @@ class EnvSqliteGateway(EnvGateway):
 
     @classmethod
     def create(cls, db=""):
-        engine = create_engine(f"sqlite://{db}", echo=True)
+        if db:
+            conn_str = f"sqlite:///{db}"
+        else:
+            conn_str = f"sqlite://"  # in memory
+        engine = create_engine(conn_str, echo=True)
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         return cls(Session())
+
+    @property
+    def conn_str(self):
+        return self.session.connection().engine.url
 
     def save_env_def(self, env_def: EnvironmentDefinition):
         new_env_def = EnvDef(id=env_def.id, long_hash=env_def.long_id, env_def=env_def.env_def)
