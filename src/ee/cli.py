@@ -42,7 +42,7 @@ def new(filename: Path):
     temp = EnvironmentDefinition(filename.open().read())
     env_def = EnvDef(packages=temp.packages, channels=temp.channels)
     typer.echo(f"Read EnvironmentDefinition from file: {filename}")
-    result = client.new(env_def)
+    result = client.new_env_def(env_def)
     # typer.echo(f"Long ID: {env_def.long_id}")
     # typer.echo(f"Short ID: {env_def.id}")
 
