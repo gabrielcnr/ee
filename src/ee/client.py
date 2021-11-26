@@ -38,3 +38,26 @@ class EEClient:
                                          env=data["env"],
                                          env_def=EnvironmentDefinition.from_dict(env_def_dict))
         return app_env
+
+    def set_env_def_for_app_env(self, app_env: ApplicationEnvironment):
+        url = f"{self.base_url}/appenvs/"
+        payload = {"app": app_env.app.name,
+                   "env": app_env.env,
+                   "env_id": app_env.env_def.id}
+        resp = self.client.post(url, json=payload)
+        resp.raise_for_status()
+
+        # sanity check
+        resp = resp.json()
+        if resp["app"] != app_env.app.name:
+            raise SanityCheckError(f"{resp['app'] = } != {app_env.app.name = }")
+
+        if resp["env"] != app_env.env:
+            raise SanityCheckError(f"{resp['env'] = } != {app_env.env = }")
+
+        if resp["env_id"] != app_env.env_def.id:
+            raise SanityCheckError(f"{resp['env_id'] = } != {app_env.env_def.id = }")
+
+
+class SanityCheckError(Exception):
+    pass
