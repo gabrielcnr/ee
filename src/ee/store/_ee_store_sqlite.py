@@ -81,8 +81,12 @@ class EnvSqliteGateway(EnvGateway):
         self.session.commit()
 
     def get_app_env(self, app_name: str, env_name: str) -> ApplicationEnvironment:
-        app_env_orm = self.session.query(AppEnv).filter(AppEnv.app == app_name,
-                                                        AppEnv.env_name == env_name).one()
+        # we want to get the last one - so we sort by id desc and then we get the first
+        query = self.session.query(AppEnv) \
+                            .filter(AppEnv.app == app_name,
+                                    AppEnv.env_name == env_name) \
+                            .order_by(AppEnv.id.desc())
+        app_env_orm = query.first()
         env_def = self._env_def_from_orm_to_business_model(app_env_orm.env_def)
         app_env = ApplicationEnvironment(app=Application(app_env_orm.app),
                                          env=app_env_orm.env_name,
