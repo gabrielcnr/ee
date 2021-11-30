@@ -36,8 +36,7 @@ def test_get_env_def_for_app_env(mock_responses, client):
     expected_app_env = ApplicationEnvironment(
         app=Application("myapp"),
         env="myenv",
-        env_def=EnvironmentDefinition.from_dict({"packages": {"pkg-a": "1.0", "pkg-b": ">2.0,<3"},
-                                                 "channels": []}),
+        env_def=EnvironmentDefinition.from_dict({"packages": {"pkg-a": "1.0", "pkg-b": ">2.0,<3"}}),
     )
     assert expected_app_env == app_env
 
@@ -51,13 +50,11 @@ def test_set_env_def_for_app_env(mock_responses, client):
                              },
                        status=200)
 
-    app_env = ApplicationEnvironment(
-        app=Application("testapp"),
-        env="testenv",
-        env_def=EnvironmentDefinition.from_dict({"packages": {"testpkg": "9.9"}}),
-    )
+    client.set_env_def_for_app_env(app="testapp", env="testenv", env_id="b1ce87e")
 
-    client.set_env_def_for_app_env(app_env)
+    call, = mock_responses.calls
+    request = call.request
 
-
-# TODO: test set_env_def_for_app_env for sanity checks!
+    assert request.method == "POST"
+    assert request.url == "http://baseurl/appenvs/"
+    assert request.body == b'{"app": "testapp", "env": "testenv", "env_id": "b1ce87e"}'

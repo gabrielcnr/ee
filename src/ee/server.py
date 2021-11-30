@@ -41,7 +41,7 @@ async def create_env_def(env_def: EnvDef):
 
     env_def = EnvironmentDefinition.from_dict(env_def_dict)
     store.save_env_def(env_def)
-    return {"env_spec": env_def.id}
+    return {"env_id": env_def.id}
 
 
 @app.get("/envdefs/{env_id}")
@@ -77,10 +77,11 @@ async def configure_app_env(app_env_request: AppEnvRequest):
 @app.get("/appenvs/")
 async def get_env_def_for_app_env(app: str, env: str):
     app_env = store.get_app_env(app, env)
+    # channels is optional
+    env_def_dict = {"env_id": app_env.env_def.id,
+                      "packages": app_env.env_def.packages}
+    if app_env.env_def.channels:
+        env_def_dict["channels"] = app_env.env_def.channels
     return {"app": app,
             "env": env,
-            "env_def": {
-                "env_id": app_env.env_def.id,
-                "packages": app_env.env_def.packages,
-                "channels": app_env.env_def.channels,
-            }}
+            "env_def": env_def_dict}

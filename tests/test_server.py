@@ -20,7 +20,7 @@ def test_create_env_def():
     env_def_payload = EnvDef(packages={"pkg-a": "<2.0", "pkg-b": "1.8.1"}).dict()
     response = client.post("/envdefs/", json=env_def_payload)
     assert response.status_code == 200
-    assert response.json() == {"env_spec": "f3538af"}
+    assert response.json() == {"env_id": "f3538af"}
 
 
 def test_get_env_def():
