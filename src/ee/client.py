@@ -25,6 +25,7 @@ class EEClient:
     def get_env_def_for_app_env(self, app: str, env: str) -> ApplicationEnvironment:
         """ Send a request to fetch the env def for the pair (app, env).
         """
+        # TODO: should return only the EnvironmentDefinition instead?
         url = f"{self.base_url}/appenvs?app={app}&env={env}"
         resp = self.client.get(url)
         resp.raise_for_status()
