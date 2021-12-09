@@ -11,6 +11,7 @@ Sub-commands:
 from pathlib import Path
 
 import typer
+from requests import HTTPError
 
 from ee.client import EEClient
 from ee.models import EnvironmentDefinition
@@ -19,6 +20,7 @@ from ee.server import EnvDef
 app = typer.Typer()
 
 client = EEClient("http://localhost:8000")
+
 
 @app.command()
 def new(filename: Path):
@@ -43,20 +45,27 @@ def new(filename: Path):
     env_def = EnvDef(packages=temp.packages, channels=temp.channels)
     typer.echo(f"Read EnvironmentDefinition from file: {filename}")
     env_id = client.new_env_def(env_def)
-    typer.echo(f"New Environment defined. ID: {env_id}")
+    typer.secho(f"New Environment defined. ID: {env_id}", fg="yellow")
 
 
 @app.command()
 def assoc(app: str, env: str, env_id: str):
     client.set_env_def_for_app_env(app=app, env=env, env_id=env_id)
-    typer.echo(f"Env: {env} for app: {app} is now set to: {env_id}")
+    typer.secho(f"Set: <<{app}, {env}>> --> {env_id}", fg="yellow")
 
 
 @app.command()
 def show(app: str, env: str):
-    app_env = client.get_env_def_for_app_env(app=app, env=env)
-    typer.echo(f"App: {app_env.app.name} - Env: {app_env.env}")
-    typer.echo(f"ID: {app_env.env_def.id}")
+    try:
+        app_env = client.get_env_def_for_app_env(app=app, env=env)
+    except HTTPError as err:
+        typer.secho(f"{err}", fg="yellow")
+        if (response := getattr(err, "response", None)) is not None:
+            if "detail" in (details := response.json()):
+                typer.secho(f"Detail: {details['detail']}", fg="yellow")
+    else:
+        typer.echo(f"App: {app_env.app.name} - Env: {app_env.env}")
+        typer.echo(f"ID: {app_env.env_def.id}")
 
 
 # TODO: command to list all env defs

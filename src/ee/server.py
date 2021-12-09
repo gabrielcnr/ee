@@ -76,12 +76,24 @@ async def configure_app_env(app_env_request: AppEnvRequest):
 
 @app.get("/appenvs/")
 async def get_env_def_for_app_env(app: str, env: str):
-    app_env = store.get_app_env(app, env)
-    # channels is optional
-    env_def_dict = {"env_id": app_env.env_def.id,
-                      "packages": app_env.env_def.packages}
-    if app_env.env_def.channels:
-        env_def_dict["channels"] = app_env.env_def.channels
-    return {"app": app,
-            "env": env,
-            "env_def": env_def_dict}
+    if app_env := store.get_app_env(app, env):
+        # channels is optional
+        env_def_dict = {"env_id": app_env.env_def.id,
+                          "packages": app_env.env_def.packages}
+        if app_env.env_def.channels:
+            env_def_dict["channels"] = app_env.env_def.channels
+        return {"app": app,
+                "env": env,
+                "env_def": env_def_dict}
+    else:
+        raise HTTPException(status_code=404, detail=f"{(app, env) = } not found")
+
+
+if __name__ == '__main__':
+    import uvicorn
+
+    if __name__ == "__main__":
+        uvicorn.run("ee.server:app",
+                    host="127.0.0.1",
+                    port=8000,
+                    log_level="info")

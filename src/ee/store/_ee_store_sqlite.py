@@ -86,12 +86,12 @@ class EnvSqliteGateway(EnvGateway):
                             .filter(AppEnv.app == app_name,
                                     AppEnv.env_name == env_name) \
                             .order_by(AppEnv.id.desc())
-        app_env_orm = query.first()
-        env_def = self._env_def_from_orm_to_business_model(app_env_orm.env_def)
-        app_env = ApplicationEnvironment(app=Application(app_env_orm.app),
-                                         env=app_env_orm.env_name,
-                                         env_def=env_def)
-        return app_env
+        if app_env_orm := query.first():
+            env_def = self._env_def_from_orm_to_business_model(app_env_orm.env_def)
+            app_env = ApplicationEnvironment(app=Application(app_env_orm.app),
+                                             env=app_env_orm.env_name,
+                                             env_def=env_def)
+            return app_env
 
 
 # Exceptions

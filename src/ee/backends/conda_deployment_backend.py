@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from ee.deployers import DeploymentBackend
@@ -26,7 +27,22 @@ class CondaDeploymentBackend(DeploymentBackend):
         if isinstance(command, str):
             command = [command]
 
-        run_command = f"{self.CONDA_CMD} run --no-capture-output -n {env_id}".split()
+        # As of Dec21 conda 4.11.0 had the behaviour of when running "conda run -n env python ..."
+        # with no environment activated or from the base environment, it worked as expected,
+        # picking up and calling python from the .../envs/env/bin/python of the environment.
+        # However if you had another environment activated and called
+        # "conda run -n env python ..." it would pick up python from the base environment
+        # instead (wrong!)
+        # So a temp workaround is to apply some kind of "inception" here and ask
+        # conda to run conda run (itself) from the base environment then pointing to "env"
+        # $ conda run -n base conda run -n env python ...
+        # Another solution to consider here is to have conda as an explicit dependency
+        # for ee, which then would make it possible to use the conda python api calls.
+        # This would require some kind of management to ensure multiple conda installations
+        # can live in harmony in the same machine / user area.
+
+        run_command = f"{self.CONDA_CMD} run --no-capture-output -n base " \
+                      f"{self.CONDA_CMD} run --no-capture-output -n {env_id}".split()
         run_command += command
 
         # TODO: decide what to do with stdout and stderr
@@ -38,3 +54,7 @@ class CondaDeploymentBackend(DeploymentBackend):
 
 class MambaDeploymentBackend(CondaDeploymentBackend):
     CONDA_CMD = "mamba"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        os.environ["MAMBA_NO_BANNER"] = "1"
