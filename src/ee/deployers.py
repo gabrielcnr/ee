@@ -21,6 +21,7 @@ class DeploymentBackend(abc.ABC):
             command: the list of command line arguments to be executed
                 inside the environment
         """
+        # TODO: error handling!!!! 
         if not self.env_exists(env_def.id):
             self.create_env(env_def)
         if command:
