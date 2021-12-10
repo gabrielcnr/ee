@@ -9,7 +9,7 @@ from ee.client import EEClient
 
 app = typer.Typer()
 
-client = EEClient("http://localhost:8000")
+client = EEClient("http://localhost:5000")
 
 backend = MambaDeploymentBackend()
 

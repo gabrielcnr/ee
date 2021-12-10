@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from typing import List
@@ -6,6 +7,8 @@ from ee.config import EE_DEBUG
 from ee.deployers import DeploymentBackend
 from ee.models import EnvironmentDefinition
 import subprocess
+
+logger = logging.getLogger(__name__)
 
 # TODO: understand why different behaviour on Windows?
 on_win = sys.platform.startswith("win")
@@ -20,8 +23,12 @@ class CondaDeploymentBackend(DeploymentBackend):
     def create_env(self, env_def: EnvironmentDefinition):
         # TODO: support for custom channels
         create_command = f"{self.CONDA_CMD} create -n {env_def.id} -y".split()
+        for conda_channel in env_def.channels:
+            create_command += ["-c", conda_channel]
         for package_name, package_version in env_def.packages.items():
             create_command.append(f'"{package_name}=={package_version}"')
+        if EE_DEBUG:
+            logger.debug(f"Executing: {create_command}")
         capture_output = not EE_DEBUG
         p = subprocess.run(create_command, shell=SHELL, capture_output=capture_output)
         return p.returncode == 0

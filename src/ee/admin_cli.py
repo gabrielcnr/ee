@@ -19,7 +19,7 @@ from ee.server import EnvDef
 
 app = typer.Typer()
 
-client = EEClient("http://localhost:8000")
+client = EEClient("http://localhost:5000")
 
 
 @app.command()
