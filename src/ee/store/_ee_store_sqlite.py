@@ -3,6 +3,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
+from ee.config import EE_DEBUG
 from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
 from ee.store.gateway import EnvGateway
 
@@ -46,7 +47,7 @@ class EnvSqliteGateway(EnvGateway):
             conn_str = f"sqlite:///{db}"
         else:
             conn_str = f"sqlite://"  # in memory
-        engine = create_engine(conn_str, echo=True)
+        engine = create_engine(conn_str, echo=EE_DEBUG)
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         return cls(Session())
@@ -57,8 +58,13 @@ class EnvSqliteGateway(EnvGateway):
 
     def save_env_def(self, env_def: EnvironmentDefinition):
         new_env_def = EnvDef(id=env_def.id, long_hash=env_def.long_id, env_def=env_def.env_def)
-        self.session.add(new_env_def)
-        self.session.commit()
+        try:
+            self.session.add(new_env_def)
+        except Exception as err:
+            # TODO: log?
+            self.session.rollback()
+        else:
+            self.session.commit()
 
     def get_env_def(self, env_id: str) -> EnvironmentDefinition:
         try:

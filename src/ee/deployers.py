@@ -1,7 +1,10 @@
 import abc
+import logging
 from typing import List
 
 from ee.models import EnvironmentDefinition
+
+logger = logging.getLogger(__name__)
 
 
 class DeploymentBackend(abc.ABC):
@@ -22,7 +25,11 @@ class DeploymentBackend(abc.ABC):
                 inside the environment
         """
         if not self.env_exists(env_def.id):
-            self.create_env(env_def)
+            logger.info(f"Environment not found: {env_def.id} - Please wait while EE creates the env ...")
+            if self.create_env(env_def):
+                logger.info(f"Environment created successfully: {env_def.id}")
+            else:
+                logger.error(f"Failed to create environment: {env_def.id}")
         if command:
             self.execute(env_def.id, command)
 

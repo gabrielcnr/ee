@@ -1,0 +1,8 @@
+{
+	"packages": {
+		"pandas": "1.2",
+		"python": "3.8",
+		"demo": "0.1"
+	},
+	"channels": ["http://localhost:8000/"]
+}
