@@ -1,5 +1,6 @@
 import requests
 
+from ee.config import EE_REQUEST_TIMEOUT
 from ee.models import ApplicationEnvironment, Application, EnvironmentDefinition
 from ee.server import EnvDef
 
@@ -17,7 +18,7 @@ class EEClient:
         """ Send a request to create a new env def.
         """
         url = f"{self.base_url}/envdefs"
-        resp = self.client.post(url, json=env_def.dict())
+        resp = self.client.post(url, json=env_def.dict(), timeout=EE_REQUEST_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
         return data["env_id"]
@@ -27,7 +28,7 @@ class EEClient:
         """
         # TODO: should return only the EnvironmentDefinition instead?
         url = f"{self.base_url}/appenvs?app={app}&env={env}"
-        resp = self.client.get(url)
+        resp = self.client.get(url, timeout=EE_REQUEST_TIMEOUT)
         resp.raise_for_status()
 
         data = resp.json()
@@ -46,7 +47,7 @@ class EEClient:
         payload = {"app": app,
                    "env": env,
                    "env_id": env_id}
-        resp = self.client.post(url, json=payload)
+        resp = self.client.post(url, json=payload, timeout=EE_REQUEST_TIMEOUT)
         resp.raise_for_status()
 
         # sanity check

@@ -1,9 +1,16 @@
 import os
+import sys
 from typing import List
 
+from ee.config import EE_DEBUG
 from ee.deployers import DeploymentBackend
 from ee.models import EnvironmentDefinition
 import subprocess
+
+# TODO: understand why different behaviour on Windows?
+on_win = sys.platform.startswith("win")
+
+SHELL = on_win
 
 
 class CondaDeploymentBackend(DeploymentBackend):
@@ -15,12 +22,14 @@ class CondaDeploymentBackend(DeploymentBackend):
         create_command = f"{self.CONDA_CMD} create -n {env_def.id} -y".split()
         for package_name, package_version in env_def.packages.items():
             create_command.append(f'"{package_name}=={package_version}"')
-        p = subprocess.run(create_command, shell=False)
+        capture_output = not EE_DEBUG
+        p = subprocess.run(create_command, shell=SHELL, capture_output=capture_output)
         return p.returncode == 0
 
     def env_exists(self, env_id: str) -> bool:
         command = f"{self.CONDA_CMD} list -n {env_id}".split()
-        p = subprocess.run(command, shell=False)
+        capture_output = not EE_DEBUG
+        p = subprocess.run(command, shell=SHELL, capture_output=capture_output)
         return p.returncode == 0
 
     def execute(self, env_id: str, command: List[str]):
@@ -48,11 +57,12 @@ class CondaDeploymentBackend(DeploymentBackend):
         # TODO: decide what to do with stdout and stderr
         #       we want the run commands to be detached
         #       and non-blocking
-        p = subprocess.Popen(run_command, shell=False)
+        p = subprocess.Popen(run_command, shell=SHELL)
         return p
 
 
 class MambaDeploymentBackend(CondaDeploymentBackend):
+
     CONDA_CMD = "mamba"
 
     def __init__(self, *args, **kwargs):
