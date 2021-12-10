@@ -1,15 +1,14 @@
 import hashlib
 import json
-from typing import Dict, List
-
-
 # TODO: should we use Pydantic?
 from dataclasses import dataclass
+from typing import Dict, List, NamedTuple
 
 
 class EnvironmentDefinition:
     """ This is the business object.
     """
+
     def __init__(self, raw_def: str):
         env_def = self.parse_env_def(raw_def)
         self.raw_def = raw_def
@@ -89,3 +88,8 @@ class ApplicationEnvironment:
     env: str
 
     env_def: EnvironmentDefinition
+
+
+class AppEnvKey(NamedTuple):
+    app: str
+    env: str

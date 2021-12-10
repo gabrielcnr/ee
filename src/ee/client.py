@@ -1,3 +1,5 @@
+from typing import List
+
 import requests
 
 from ee.config import EE_REQUEST_TIMEOUT
@@ -60,6 +62,13 @@ class EEClient:
 
         if resp["env_id"] != env_id:
             raise SanityCheckError(f"{resp['env_id'] = } != {env_id = }")
+
+    def list_envs(self) -> List:
+        url = f"{self.base_url}/appenvs/list"
+        resp = self.client.get(url, timeout=EE_REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        result = resp.json()
+        return result
 
 
 class SanityCheckError(Exception):

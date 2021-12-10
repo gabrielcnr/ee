@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
+from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application, AppEnvKey
 from ee.store import EnvSqliteGateway
 from ee.store._ee_store_sqlite import EnvDef, EnvironmentPersistenceError, AppEnv
 
@@ -98,3 +98,26 @@ def test_get_app_env(gateway, simple_env_def):
     assert app_env_returned.env == "test-env"
     assert app_env_returned.env_def.id == "0f89efe"
     assert app_env_returned.env_def.packages == {"pandas": ">=1.1,<1.2"}
+
+
+def test_list_app_envs(gateway):
+    gateway.session.add_all([
+        AppEnv(app="app1", env_name="uat", env_def_id="envdef1"),
+        AppEnv(app="app1", env_name="uat", env_def_id="envdef2"),
+        AppEnv(app="app2", env_name="uat", env_def_id="envdef1"),
+        AppEnv(app="app2", env_name="uat", env_def_id="envdef2"),
+        AppEnv(app="app2", env_name="uat", env_def_id="envdef3"),
+        AppEnv(app="app2", env_name="prod", env_def_id="envdef1"),
+        AppEnv(app="app2", env_name="prod", env_def_id="envdef2"),
+        AppEnv(app="app3", env_name="prod", env_def_id="envdef9"),
+    ])
+    gateway.session.commit()
+
+    expected = {
+        AppEnvKey(app='app1', env='uat'): 'envdef2',
+        AppEnvKey(app='app2', env='uat'): 'envdef3',
+        AppEnvKey(app='app2', env='prod'): 'envdef2',
+        AppEnvKey(app='app3', env='prod'): 'envdef9',
+    }
+
+    assert expected == gateway.list_app_envs()

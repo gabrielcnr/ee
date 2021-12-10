@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import Dict
 
-from ee.models import EnvironmentDefinition, ApplicationEnvironment
+from ee.models import EnvironmentDefinition, ApplicationEnvironment, AppEnvKey
+
+EnvID = str
 
 
 class EnvGateway(ABC):
@@ -27,34 +30,16 @@ class EnvGateway(ABC):
 
     @abstractmethod
     def get_env_def(self, env_id: str) -> EnvironmentDefinition:
-        """
-
-        Args:
-            env_id:
-
-        Returns:
-
-        """
+        ...
 
     @abstractmethod
     def save_app_env(self, app_env: ApplicationEnvironment):
-        """
-
-        Args:
-            app_env:
-
-        Returns:
-
-        """
+        ...
 
     @abstractmethod
     def get_app_env(self, app_name: str, env_name: str) -> ApplicationEnvironment:
-        """
+        ...
 
-        Args:
-            app_name:
-            env_name:
-
-        Returns:
-
-        """
+    @abstractmethod
+    def list_app_envs(self) -> Dict[AppEnvKey, EnvID]:
+        ...

@@ -1,11 +1,13 @@
-from sqlalchemy import Column, String, JSON, create_engine, Integer, ForeignKey
+from typing import Dict
+
+from sqlalchemy import Column, String, JSON, create_engine, Integer, ForeignKey, func
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
 from ee.config import EE_DEBUG
-from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
-from ee.store.gateway import EnvGateway
+from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application, AppEnvKey
+from ee.store.gateway import EnvGateway, EnvID
 
 # ORM Models
 
@@ -98,6 +100,18 @@ class EnvSqliteGateway(EnvGateway):
                                              env=app_env_orm.env_name,
                                              env_def=env_def)
             return app_env
+
+    def list_app_envs(self) -> Dict[AppEnv, EnvID]:
+        sub_query = self.session.query(AppEnv.app,
+                                       AppEnv.env_name,
+                                       func.max(AppEnv.id).label("max_id"))\
+                                .group_by(AppEnv.app, AppEnv.env_name)\
+                                .subquery()
+
+        query = self.session.query(AppEnv.app, AppEnv.env_name, AppEnv.env_def_id)\
+                            .filter(AppEnv.id == sub_query.c.max_id)
+
+        return {AppEnvKey(app=r.app, env=r.env_name): r.env_def_id for r in query}
 
 
 # Exceptions

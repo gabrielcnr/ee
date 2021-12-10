@@ -19,7 +19,7 @@ from ee.server import EnvDef
 
 app = typer.Typer()
 
-client = EEClient("http://localhost:5000")
+client = EEClient("http://localhost:5001")
 
 
 @app.command()
@@ -66,6 +66,17 @@ def show(app: str, env: str):
     else:
         typer.echo(f"App: {app_env.app.name} - Env: {app_env.env}")
         typer.echo(f"ID: {app_env.env_def.id}")
+
+
+@app.command("list")
+def list_envs():
+    """ List all (app, env)
+    """
+    for item in (envs := client.list_envs()):
+        app, env = item["app_env"]
+        env_id = item["env_id"]
+        print(f"({app}, {env}) --> {env_id}")
+    print(f"\nTotal: {len(envs)}")
 
 
 # TODO: command to list all env defs

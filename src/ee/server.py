@@ -79,7 +79,7 @@ async def get_env_def_for_app_env(app: str, env: str):
     if app_env := store.get_app_env(app, env):
         # channels is optional
         env_def_dict = {"env_id": app_env.env_def.id,
-                          "packages": app_env.env_def.packages}
+                        "packages": app_env.env_def.packages}
         if app_env.env_def.channels:
             env_def_dict["channels"] = app_env.env_def.channels
         return {"app": app,
@@ -87,6 +87,17 @@ async def get_env_def_for_app_env(app: str, env: str):
                 "env_def": env_def_dict}
     else:
         raise HTTPException(status_code=404, detail=f"{(app, env) = } not found")
+
+
+@app.get("/appenvs/list")
+async def get_app_env_list():
+    return [{"app_env": k, "env_id": v} for k, v in store.list_app_envs().items()]
+    # TODO: why can't I return a dict where the key is a tuple? :-/
+
+
+@app.get("/")
+async def index():
+    return "Hello, world!"
 
 
 if __name__ == '__main__':
