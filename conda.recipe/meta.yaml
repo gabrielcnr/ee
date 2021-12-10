@@ -1,0 +1,31 @@
+package:
+  name: ee
+  version: 0.1.0
+
+source:
+  path: ..
+
+build:
+  script: python setup.py install
+
+requirements:
+  build:
+    - python >=3.8
+    - setuptools
+
+  run:
+    - python >=3.8
+    # TODO: pull this from the env.yml
+    - fastapi
+    - sqlalchemy
+    - typer
+    - uvicorn
+
+test:
+  requires:
+    - pytest
+    - pytest-mock
+    - responses
+
+  imports:
+    - ee
