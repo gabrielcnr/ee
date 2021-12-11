@@ -10,6 +10,7 @@ setup(
         "console_scripts": [
             "ee-run = ee.cli:app",
             "ee-admin = ee.admin_cli:app",
+            "ee-server = ee.server:run",
         ],
     },
 )
