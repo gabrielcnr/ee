@@ -17,6 +17,8 @@ from ee.client import EEClient
 from ee.models import EnvironmentDefinition
 from ee.server import EnvDef
 
+from pygments import highlight, lexers, formatters
+
 app = typer.Typer()
 
 client = EEClient("http://localhost:5001")
@@ -55,7 +57,15 @@ def assoc(app: str, env: str, env_id: str):
 
 
 @app.command()
-def show(app: str, env: str):
+def show(app: str,
+         env: str,
+         details: bool = typer.Option(False, help="Show env def details")):
+    """
+    Show the current Env ID mapped to a given (app, env).
+
+    If --details is used, then it will show the environment definition
+    with the packages specification for the currently mapped env.
+    """
     try:
         app_env = client.get_env_def_for_app_env(app=app, env=env)
     except HTTPError as err:
@@ -64,8 +74,14 @@ def show(app: str, env: str):
             if "detail" in (details := response.json()):
                 typer.secho(f"Detail: {details['detail']}", fg="yellow")
     else:
-        typer.echo(f"App: {app_env.app.name} - Env: {app_env.env}")
-        typer.echo(f"ID: {app_env.env_def.id}")
+        banner = f"App: {app_env.app.name} - Env: {app_env.env} ---> EnvID: {app_env.env_def.id}"
+        typer.secho("\n"+banner, fg="yellow")
+        if details:
+            typer.echo("-" * min(70, len(banner) + 1) + "\n")
+            env_def_json = app_env.env_def.to_json(pretty=True)
+            pretty_json = highlight(env_def_json, lexers.JsonLexer(), formatters.TerminalFormatter())
+            typer.echo(pretty_json)
+        # typer.echo(f"Launch this environment with:\nee {app} {env")  # hint
 
 
 @app.command("list")
@@ -81,8 +97,8 @@ def list_envs():
 
 # TODO: command to list all env defs
 # TODO: command to remove/delete an env def
-# TODO: command to list all (app, envs)
 # TODO: command to show history of an (app, env)
+# TODO: disable
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ requirements:
     - python >=3.8
     # TODO: pull this from the env.yml
     - fastapi
+    - pygments
     - sqlalchemy
     - typer
     - uvicorn

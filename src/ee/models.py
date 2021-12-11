@@ -46,9 +46,16 @@ class EnvironmentDefinition:
         Long hash/id for this environment.
         """
         if self._long_id is None:
-            self._long_id = hashlib.sha256(json.dumps(
-                self.env_def, sort_keys=True).encode()).hexdigest()
+            self._long_id = hashlib.sha256(self.to_json().encode()).hexdigest()
         return self._long_id
+
+    def to_json(self, pretty: bool = False) -> str:
+        if pretty:
+            kwargs = {"indent": 4}
+        else:
+            kwargs = {}
+        env_def_json = json.dumps(self.env_def, sort_keys=True, **kwargs)
+        return env_def_json
 
     @property
     def packages(self) -> Dict:
