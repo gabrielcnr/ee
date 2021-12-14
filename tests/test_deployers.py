@@ -3,7 +3,6 @@ from ee.models import EnvironmentDefinition
 
 
 class InMemoryDeploymentBackend(DeploymentBackend):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # we do not use dict here because we want to check if env is not created twice
@@ -42,7 +41,10 @@ def test_deployer_can_run_something():
     deployer.run(env_def, cmd_args_2)
 
     assert [("92f9752", env_def)] == deployer.envs
-    assert [("92f9752", cmd_args), ("92f9752", cmd_args_2)] == deployer.executed_commands
+    assert [
+        ("92f9752", cmd_args),
+        ("92f9752", cmd_args_2),
+    ] == deployer.executed_commands
 
     # Now we want to use a brand new environment
     env_def_2 = EnvironmentDefinition('{"packages": {"bar": "4.5.6"}}')

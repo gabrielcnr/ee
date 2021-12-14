@@ -1,6 +1,6 @@
 {
   "packages": {
-    "python": "3.9",
-    "pandas": "1.2"
+    "pandas": "1.2",
+    "python": "3.9"
   }
 }

@@ -32,7 +32,7 @@ For example, consider a file `env.json`:
         "pandas": ">=1.2,<1.3"
     }
 }
-    
+
 ```
 
 You can add that environment with:

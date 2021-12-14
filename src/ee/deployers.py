@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class DeploymentBackend(abc.ABC):
-
     def run(self, env_def: EnvironmentDefinition, command: List[str]):
         """
         This is the main public method.
@@ -25,7 +24,10 @@ class DeploymentBackend(abc.ABC):
                 inside the environment
         """
         if not self.env_exists(env_def.id):
-            logger.info(f"Environment not found: {env_def.id} - Please wait while EE creates the env ...")
+            logger.info(
+                f"Environment not found: {env_def.id}"
+                " - Please wait while EE creates the env ..."
+            )
             if self.create_env(env_def):
                 logger.info(f"Environment created successfully: {env_def.id}")
             else:

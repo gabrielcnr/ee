@@ -1,6 +1,6 @@
 import pytest
 
-from ee.models import EnvironmentDefinition, ApplicationEnvironment
+from ee.models import ApplicationEnvironment, EnvironmentDefinition
 from ee.store import EnvGateway
 
 
