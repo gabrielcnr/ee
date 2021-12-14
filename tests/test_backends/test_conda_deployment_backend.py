@@ -1,4 +1,4 @@
-from ee.backends.conda_deployment_backend import CondaDeploymentBackend
+from ee.backends.conda_deployment_backend import CondaDeploymentBackend, SHELL
 from ee.models import Application, ApplicationEnvironment, EnvironmentDefinition
 from ee.service import EnvironmentService
 
@@ -8,7 +8,7 @@ def test_conda_deployment_backend_run_command(mocker, in_memory_store):
 
     service = EnvironmentService(store=in_memory_store, deployment_backend=backend)
 
-    env_def = EnvironmentDefinition('{"packages": {"foo": "1.2.3", "bar": "4.5.6"}}')
+    env_def = EnvironmentDefinition('{"packages": {"foo": "1.2.3", "bar": ">=4.5.1,<5.0"}}')
     service.save_env_def(env_def)
 
     app = Application(name="my-app")
@@ -29,14 +29,16 @@ def test_conda_deployment_backend_run_command(mocker, in_memory_store):
     # 2) for creating the environment the first time
     # 3) for running the command
     assert mock_subprocess_run.call_args_list == [
-        mocker.call(["conda", "list", "-n", "88183ec"], shell=True),
+        mocker.call(["conda", "list", "-n", "412b992"], shell=SHELL, capture_output=True),
         mocker.call(
-            'conda create -n 88183ec -y "foo==1.2.3" "bar==4.5.6"'.split(), shell=True
+            'conda create -n 412b992 -y "foo=1.2.3" "bar>=4.5.1,<5.0"'.split(), shell=SHELL,
+            capture_output=True,
         ),
     ]
 
     mock_subprocess_Popen.assert_has_calls(
         [
-            mocker.call("conda run -n 88183ec foo bar".split(), shell=True),
+            mocker.call("conda run --no-capture-output -n base "
+                        "conda run --no-capture-output -n 412b992 foo bar".split(), shell=SHELL),
         ]
     )

@@ -1,7 +1,10 @@
+from typing import Dict
+
 import pytest
 
-from ee.models import ApplicationEnvironment, EnvironmentDefinition
+from ee.models import ApplicationEnvironment, EnvironmentDefinition, AppEnvKey
 from ee.store import EnvGateway
+from ee.store.gateway import EnvID
 
 
 class InMemoryEnvironmentStore(EnvGateway):
@@ -29,6 +32,10 @@ class InMemoryEnvironmentStore(EnvGateway):
 
     def get_app_env(self, app_name: str, env_name: str) -> ApplicationEnvironment:
         return self.d["apps"][app_name][env_name][-1]
+
+
+    def list_app_envs(self) -> Dict[AppEnvKey, EnvID]:
+        return {AppEnvKey(app, env): self.d[app][env][-1] for app in self.d for env in self.d[app]}
 
 
 @pytest.fixture
