@@ -9,15 +9,15 @@ Sub-commands:
 
 """
 from pathlib import Path
+from typing import Optional
 
 import typer
+from pygments import formatters, highlight, lexers
 from requests import HTTPError
 
 from ee.client import EEClient
 from ee.models import EnvironmentDefinition
 from ee.server import EnvDef
-
-from pygments import highlight, lexers, formatters
 
 app = typer.Typer()
 
@@ -26,7 +26,7 @@ client = EEClient("http://localhost:5001")
 
 @app.command()
 def new(filename: Path):
-    """ Add a new Env Spec based on the given filename.
+    """Add a new Env Spec based on the given filename.
 
     It must be a JSON file defining "packages".
     Optionally it may define "channels".
@@ -57,15 +57,14 @@ def assoc(app: str, env: str, env_id: str):
 
 
 @app.command()
-def show(app: str,
-         env: str,
-         details: bool = typer.Option(False, help="Show env def details")):
+def show(app: str, env: str, details: Optional[bool] = None):
     """
     Show the current Env ID mapped to a given (app, env).
 
     If --details is used, then it will show the environment definition
     with the packages specification for the currently mapped env.
     """
+    details = details or typer.Option(False, help="Show env def details")
     try:
         app_env = client.get_env_def_for_app_env(app=app, env=env)
     except HTTPError as err:
@@ -74,20 +73,24 @@ def show(app: str,
             if "detail" in (details := response.json()):
                 typer.secho(f"Detail: {details['detail']}", fg="yellow")
     else:
-        banner = f"App: {app_env.app.name} - Env: {app_env.env} ---> EnvID: {app_env.env_def.id}"
-        typer.secho("\n"+banner, fg="yellow")
+        banner = (
+            f"App: {app_env.app.name} - Env: {app_env.env}"
+            f" ---> EnvID: {app_env.env_def.id}"
+        )
+        typer.secho("\n" + banner, fg="yellow")
         if details:
             typer.echo("-" * min(70, len(banner) + 1) + "\n")
             env_def_json = app_env.env_def.to_json(pretty=True)
-            pretty_json = highlight(env_def_json, lexers.JsonLexer(), formatters.TerminalFormatter())
+            pretty_json = highlight(
+                env_def_json, lexers.JsonLexer(), formatters.TerminalFormatter()
+            )
             typer.echo(pretty_json)
         # typer.echo(f"Launch this environment with:\nee {app} {env")  # hint
 
 
 @app.command("list")
 def list_envs():
-    """ List all (app, env)
-    """
+    """List all (app, env)"""
     for item in (envs := client.list_envs()):
         app, env = item["app_env"]
         env_id = item["env_id"]

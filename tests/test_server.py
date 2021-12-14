@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import ee.store
-from ee.server import app, EnvDef, AppEnvRequest
+from ee.server import AppEnvRequest, EnvDef, app
 from ee.store import EnvSqliteGateway
 
 client = TestClient(app)
@@ -10,8 +10,7 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def test_gateway(mocker, tmp_path):
-    """ Can't use in-memory sqlite database with multithreaded code.
-    """
+    """Can't use in-memory sqlite database with multithreaded code."""
     mocker.patch.object(ee.server, "store", EnvSqliteGateway.create(tmp_path / "ee.db"))
     yield
 
@@ -31,9 +30,11 @@ def test_get_env_def():
     # Retrieve it back
     response = client.get("/envdefs/f3538af")
     assert response.status_code == 200
-    assert response.json() == {"env_id": "f3538af",
-                               "packages": {"pkg-a": "<2.0", "pkg-b": "1.8.1"},
-                               "channels": []}
+    assert response.json() == {
+        "env_id": "f3538af",
+        "packages": {"pkg-a": "<2.0", "pkg-b": "1.8.1"},
+        "channels": [],
+    }
 
 
 def test_configure_app_env():
@@ -41,13 +42,13 @@ def test_configure_app_env():
     env_def_payload = EnvDef(packages={"pkg-a": "<2.0", "pkg-b": "1.8.1"}).dict()
     client.post("/envdefs/", json=env_def_payload)
 
-    app_env_payload = AppEnvRequest(app="some-app", env="some-env", env_id="f3538af").dict()
+    app_env_payload = AppEnvRequest(
+        app="some-app", env="some-env", env_id="f3538af"
+    ).dict()
     resp = client.post("/appenvs/", json=app_env_payload)
 
     assert resp.status_code == 200
-    assert resp.json() == {"app": "some-app",
-                           "env": "some-env",
-                           "env_id": "f3538af"}
+    assert resp.json() == {"app": "some-app", "env": "some-env", "env_id": "f3538af"}
 
 
 def test_get_env_def_for_app_env():
@@ -61,11 +62,15 @@ def test_get_env_def_for_app_env():
 
     # Associate (some-app, some-env) --> 3c3f3fc
     for env_id in ["f3538af", "3c3f3fc"]:
-        app_env_payload = AppEnvRequest(app="some-app", env="some-env", env_id=env_id).dict()
+        app_env_payload = AppEnvRequest(
+            app="some-app", env="some-env", env_id=env_id
+        ).dict()
         client.post("/appenvs/", json=app_env_payload)
 
     # Associate (some-app, another-env) --> f3538af
-    app_env_payload = AppEnvRequest(app="some-app", env="another-env", env_id="f3538af").dict()
+    app_env_payload = AppEnvRequest(
+        app="some-app", env="another-env", env_id="f3538af"
+    ).dict()
     client.post("/appenvs/", json=app_env_payload)
 
     #

@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
+from ee.models import Application, ApplicationEnvironment, EnvironmentDefinition
 from ee.store import EnvSqliteGateway
 
 
@@ -34,7 +34,8 @@ store = EnvSqliteGateway.create(f"{Path('~/ee.db').expanduser()}")
 
 @app.post("/envdefs/")
 async def create_env_def(env_def: EnvDef):
-    # TODO: do we need here 2 models, one pure Python and one Pydantic? I don't think so... ?
+    # TODO: do we need here 2 models, one pure Python and one Pydantic? I don't think
+    #  so... ?
     env_def_dict = {"packages": env_def.packages}
     if env_def.channels:
         env_def_dict["channels"] = env_def.channels
@@ -47,7 +48,9 @@ async def create_env_def(env_def: EnvDef):
 @app.get("/envdefs/{env_id}")
 async def get_env_def(env_id: str):
     env_def = store.get_env_def(env_id)
-    env_def_api_model = EnvDef(packages=env_def.packages, channels=env_def.channels, env_id=env_def.id)
+    env_def_api_model = EnvDef(
+        packages=env_def.packages, channels=env_def.channels, env_id=env_def.id
+    )
     return env_def_api_model.dict()
 
 
@@ -64,27 +67,29 @@ async def configure_app_env(app_env_request: AppEnvRequest):
     if env_def is None:
         raise HTTPException(status_code=404, detail="env_id not found")
 
-    app_env = ApplicationEnvironment(app=Application(name=app_env_request.app),
-                                     env=app_env_request.env,
-                                     env_def=env_def)
+    app_env = ApplicationEnvironment(
+        app=Application(name=app_env_request.app),
+        env=app_env_request.env,
+        env_def=env_def,
+    )
 
     store.save_app_env(app_env)
-    return AppEnvResponse(app=app_env.app.name,
-                          env=app_env.env,
-                          env_id=app_env.env_def.id)
+    return AppEnvResponse(
+        app=app_env.app.name, env=app_env.env, env_id=app_env.env_def.id
+    )
 
 
 @app.get("/appenvs/")
 async def get_env_def_for_app_env(app: str, env: str):
     if app_env := store.get_app_env(app, env):
         # channels is optional
-        env_def_dict = {"env_id": app_env.env_def.id,
-                        "packages": app_env.env_def.packages}
+        env_def_dict = {
+            "env_id": app_env.env_def.id,
+            "packages": app_env.env_def.packages,
+        }
         if app_env.env_def.channels:
             env_def_dict["channels"] = app_env.env_def.channels
-        return {"app": app,
-                "env": env,
-                "env_def": env_def_dict}
+        return {"app": app, "env": env, "env_def": env_def_dict}
     else:
         raise HTTPException(status_code=404, detail=f"{(app, env) = } not found")
 
@@ -102,11 +107,9 @@ async def index():
 
 def run():
     import uvicorn
-    uvicorn.run("ee.server:app",
-                host="127.0.0.1",
-                port=5000,
-                log_level="info")
+
+    uvicorn.run("ee.server:app", host="127.0.0.1", port=5000, log_level="info")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

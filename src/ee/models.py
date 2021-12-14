@@ -1,13 +1,12 @@
+# TODO: should we use Pydantic?
 import hashlib
 import json
-# TODO: should we use Pydantic?
 from dataclasses import dataclass
 from typing import Dict, List, NamedTuple
 
 
 class EnvironmentDefinition:
-    """ This is the business object.
-    """
+    """This is the business object."""
 
     def __init__(self, raw_def: str):
         env_def = self.parse_env_def(raw_def)
@@ -26,15 +25,17 @@ class EnvironmentDefinition:
     def parse_env_def(self, raw_def: str) -> Dict:
         env_def = json.loads(raw_def)
         if "packages" not in env_def:
-            raise ValueError("You must specify \"packages\" in your "
-                             "environment definition.")
+            raise ValueError(
+                'You must specify "packages" in your ' "environment definition."
+            )
         if not env_def["packages"]:
-            raise ValueError("Your packages cannot be blank/empty in your "
-                             "environment definition.")
+            raise ValueError(
+                "Your packages cannot be blank/empty in your " "environment definition."
+            )
         return env_def
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """
         Short hash/id for this environment.
         """

@@ -1,15 +1,16 @@
 import pytest
-
-from ee.models import EnvironmentDefinition, ApplicationEnvironment, Application
-from ee.service import EnvironmentService
-
 from test_deployers import InMemoryDeploymentBackend
+
+from ee.models import Application, ApplicationEnvironment, EnvironmentDefinition
+from ee.service import EnvironmentService
 
 
 @pytest.fixture
 def env_service(in_memory_store):
     deployment_backend = InMemoryDeploymentBackend()
-    env_service = EnvironmentService(store=in_memory_store, deployment_backend=deployment_backend)
+    env_service = EnvironmentService(
+        store=in_memory_store, deployment_backend=deployment_backend
+    )
     return env_service
 
 
@@ -77,4 +78,6 @@ def test_run(env_service: EnvironmentService):
 
     # We can then run the asserts against the deployment backend inside our service
     assert [("b262deb", env_def)] == env_service.deployment_backend.envs
-    assert [("b262deb", ["hello", "world"])] == env_service.deployment_backend.executed_commands
+    assert [
+        ("b262deb", ["hello", "world"])
+    ] == env_service.deployment_backend.executed_commands

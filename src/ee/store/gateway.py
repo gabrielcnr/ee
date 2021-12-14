@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
-from ee.models import EnvironmentDefinition, ApplicationEnvironment, AppEnvKey
+from ee.models import AppEnvKey, ApplicationEnvironment, EnvironmentDefinition
 
 EnvID = str
 
