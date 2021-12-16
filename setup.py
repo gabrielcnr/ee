@@ -12,7 +12,7 @@ setup(
     extras_require={"testing": ["pytest", "pytest-mock", "responses"]},
     entry_points={
         "console_scripts": [
-            "ee-run = ee.cli:app",
+            "ee = ee.cli:main",
             "ee-admin = ee.admin_cli:app",
             "ee-server = ee.server:run",
         ],
