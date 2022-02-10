@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import click
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -102,14 +103,24 @@ async def get_app_env_list():
 
 @app.get("/")
 async def index():
-    return "Hello, world!"
+    return "Hello, world! This is the ee server!"
 
 
-def run():
+@click.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+    )
+)
+@click.option("--host", default="0.0.0.0", help="Hostname")
+@click.option("-p", "--port", default=5000, help="TCP port to listen")
+def runserver(host: str, port: int):
+    """Runs the development server for ee.
+    It runs the FastAPI ASGI app using uvicorn.
+    """
     import uvicorn
 
-    uvicorn.run("ee.server:app", host="127.0.0.1", port=5000, log_level="info")
+    uvicorn.run("ee.server:app", host=host, port=port, log_level="info")
 
 
 if __name__ == "__main__":
-    run()
+    runserver()

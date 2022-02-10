@@ -11,10 +11,12 @@ setup(
     python_requires=">=3.8",
     extras_require={"testing": ["pytest", "pytest-mock", "responses"]},
     entry_points={
+        "ee_command": [
+            "runserver = ee.server:runserver",
+            "run = ee.cli:run",
+        ],
         "console_scripts": [
             "ee = ee.cli:main",
-            "ee-admin = ee.admin_cli:app",
-            "ee-server = ee.server:run",
         ],
     },
 )

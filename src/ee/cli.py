@@ -4,6 +4,7 @@ ee - Command Line Interface (USER)
 from typing import List
 
 import click
+import pkg_resources
 import typer
 
 from ee.backends.conda_deployment_backend import MambaDeploymentBackend
@@ -48,10 +49,14 @@ def run(app: str, env: str, command: List[str]):
 
 typer_click_object = typer.main.get_command(app)
 
-typer_click_object.add_command(run, "run")
+
+def register_subcommands():
+    for ep in pkg_resources.iter_entry_points("ee_command"):
+        typer_click_object.add_command(ep.resolve(), ep.name)
 
 
 def main():
+    register_subcommands()
     typer_click_object()
 
 
