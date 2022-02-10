@@ -70,7 +70,7 @@ class CondaDeploymentBackend(DeploymentBackend):
         # TODO: decide what to do with stdout and stderr
         #       we want the run commands to be detached
         #       and non-blocking
-        p = subprocess.Popen(run_command, shell=SHELL)
+        p = subprocess.run(run_command, shell=SHELL)
         return p
 
 

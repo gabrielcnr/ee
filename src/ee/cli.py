@@ -26,14 +26,16 @@ def callback():
     """
 
 
-@click.command(context_settings=dict(
-    ignore_unknown_options=True,
-))
+@click.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+    )
+)
 @click.option("-a", "--app", required=True, help="Application name")
 @click.option("-e", "--env", required=True, help="Environment name (e.g.: prod)")
 @click.argument("command", required=True, nargs=-1, type=click.UNPROCESSED)
 def run(app: str, env: str, command: List[str]):
-    """ Run a command inside the context of an (app, env).
+    """Run a command inside the context of an (app, env).
 
     You must specify a command.
 
