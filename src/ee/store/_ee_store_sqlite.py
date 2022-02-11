@@ -1,8 +1,7 @@
-import os.path
 from typing import Dict
 
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, create_engine, func
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, OperationalError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
@@ -55,15 +54,17 @@ class EnvSqliteGateway(EnvGateway):
     @classmethod
     def create(cls, db=""):
         if db:
-            needs_creating = os.path.exists(db)
             conn_str = f"sqlite:///{db}"
         else:
-            needs_creating = True
             conn_str = "sqlite://"  # in memory
         conn_str = f"{conn_str}?check_same_thread=False"
         engine = create_engine(conn_str, echo=EE_DEBUG)
-        if needs_creating:
+        try:
             Base.metadata.create_all(engine)
+        except OperationalError:
+            # already created?
+            # TODO: do this properly
+            pass
         Session = sessionmaker(bind=engine)
         return cls(Session())
 
