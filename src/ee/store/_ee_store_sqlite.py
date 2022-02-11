@@ -1,3 +1,4 @@
+import os.path
 from typing import Dict
 
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, create_engine, func
@@ -54,12 +55,15 @@ class EnvSqliteGateway(EnvGateway):
     @classmethod
     def create(cls, db=""):
         if db:
+            needs_creating = os.path.exists(db)
             conn_str = f"sqlite:///{db}"
         else:
+            needs_creating = True
             conn_str = "sqlite://"  # in memory
         conn_str = f"{conn_str}?check_same_thread=False"
         engine = create_engine(conn_str, echo=EE_DEBUG)
-        Base.metadata.create_all(engine)
+        if needs_creating:
+            Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         return cls(Session())
 
