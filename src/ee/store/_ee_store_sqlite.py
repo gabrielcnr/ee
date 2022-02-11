@@ -57,6 +57,7 @@ class EnvSqliteGateway(EnvGateway):
             conn_str = f"sqlite:///{db}"
         else:
             conn_str = "sqlite://"  # in memory
+        conn_str = f"{conn_str}?check_same_thread=False"
         engine = create_engine(conn_str, echo=EE_DEBUG)
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
