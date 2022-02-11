@@ -1,7 +1,7 @@
 from typing import Dict
 
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, create_engine, func
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, OperationalError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
@@ -57,8 +57,14 @@ class EnvSqliteGateway(EnvGateway):
             conn_str = f"sqlite:///{db}"
         else:
             conn_str = "sqlite://"  # in memory
+        conn_str = f"{conn_str}?check_same_thread=False"
         engine = create_engine(conn_str, echo=EE_DEBUG)
-        Base.metadata.create_all(engine)
+        try:
+            Base.metadata.create_all(engine)
+        except OperationalError:
+            # already created?
+            # TODO: do this properly
+            pass
         Session = sessionmaker(bind=engine)
         return cls(Session())
 
